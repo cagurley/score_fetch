@@ -62,7 +62,7 @@ def main():
         log(f'Fetcher booted from disk at {dt.datetime.now()}')
         while True:
             current = dt.datetime.now()
-            next_start = current + dt.timedelta(minutes=30)
+            next_start = current + dt.timedelta(hours=1)
             plog(f'Cycle begun at {current}')
             try:
                 hpath = None
@@ -121,7 +121,7 @@ def main():
                             filename = urlparse(filename)
                             filename = get_valid_filename(unquote(PurePath(filename.path).name))
                             log(f'Download of {filename} begun')
-                            download_path = hdata['dest_dir'] / filename
+                            download_path = PurePath(hdata['dest_dir']).joinpath(filename)
                             print(f"Downloading file from url {filename}")
                             # DON'T USE THE SESSION HERE
                             download_response = requests.get(file, allow_redirects=True, stream=True)
@@ -155,7 +155,7 @@ def main():
                 print(f'Next cycle will begin at {next_start}')
                 sleep(sleep_interval)
             else:
-                plog('Cycle took longer than 30 minutes to complete')
+                plog('Cycle took longer than one hour to complete')
             if os.name == 'nt':
                 os.system('cls')
             else:
