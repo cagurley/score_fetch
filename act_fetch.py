@@ -116,13 +116,12 @@ def main():
                     if len(files_to_download) == 0:
                         log('No undelivered files to download found')
                     else:
-                        for filename in files_to_download:
+                        for file in files_to_download:
                             # Get the file name from the url, unescape it, and then replace whitespace with underscore
-                            filename = urlparse(filename)
+                            filename = urlparse(file)
                             filename = get_valid_filename(unquote(PurePath(filename.path).name))
-                            log(f'Download of {filename} begun')
                             download_path = PurePath(hdata['dest_dir']).joinpath(filename)
-                            print(f"Downloading file from url {filename}")
+                            plog(f"Downloading file from url {file}")
                             # DON'T USE THE SESSION HERE
                             download_response = requests.get(file, allow_redirects=True, stream=True)
                             if download_response.ok:
