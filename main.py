@@ -12,7 +12,7 @@ from time import sleep
 
 def main():
     try:
-        log(f'Fetcher booted from disk at {dt.datetime.now()}')
+        log(f'Fetcher booted from disk at {dt.datetime.now().astimezone()}')
         while True:
             current = dt.datetime.now().astimezone()
             # current = current + dt.timedelta(days=-7)
@@ -33,7 +33,7 @@ def main():
             else:
                 os.system('clear')
     except KeyboardInterrupt:
-        plog(f'Fetcher terminated via keyboard interrupt at {dt.datetime.now()}')
+        plog(f'Fetcher terminated via keyboard interrupt at {dt.datetime.now().astimezone()}')
     finally:
         return None
 
