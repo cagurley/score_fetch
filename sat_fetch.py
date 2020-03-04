@@ -61,7 +61,8 @@ def main():
     try:
         log(f'Fetcher booted from disk at {dt.datetime.now()}')
         while True:
-            current = dt.datetime.now()
+            current = dt.datetime.now().astimezone()
+            current = current + dt.timedelta(days=-7)
             next_start = current + dt.timedelta(hours=1)
             plog(f'Cycle begun at {current}')
             try:
@@ -71,12 +72,10 @@ def main():
                     hpath = PurePath(os.environ['HOME'])
                 else:
                     hpath = PurePath(os.environ['HOMEDRIVE'] + os.environ['HOMEPATH'])
-                hpath = hpath.joinpath('.score_fetch', 'act.json')
+                hpath = hpath.joinpath('.score_fetch', 'sat.json')
                 with open(hpath) as file:
                     hdata = json.load(file)
                 if not validate_keys(hdata, ('url',
-                                             'api_key',
-                                             'org_uid',
                                              'dest_dir',
                                              'username',
                                              'password')):
@@ -87,29 +86,24 @@ def main():
                 try:
                     # Login and authorization
                     log(f"Login to {hdata['url']} begun")
-                    payload = {"userName": hdata['username'], "password": hdata['password'], "acceptedTerms": True}
+                    payload = {'username': hdata['username'], 'password': hdata['password']}
                     session = requests.Session()
-                    session.headers.update({"x-api-key": hdata['api_key']})
-                    response_json = session.post(f"{hdata['url']}/login", data=json.dumps(payload)).json()
-                    if "sessionToken" not in response_json:
-                        raise MissingResponseError(f"Couldn't find sessionToken in response json:\n {response_json}")
-                    session.headers.update({"Authorization": f"JWT {response_json['sessionToken']}"})
+                    session.headers.update({'Accept': 'application/json', 'Content-Type': 'application/json'})
 
                     # Determine files to download
                     log(f"Request for undelivered files begun")
-                    payload = {"status": "NotDelivered", "productKey": "score-reporter"}
-                    response_json = session.get(f"{hdata['url']}/datacenter/exports",
-                                                params=payload,
-                                                headers={"Organization": hdata['org_uid']}).json()
+                    response_json = session.post(f"{hdata['url']}/files/list",
+                                                 data=json.dumps(payload),
+                                                 params={'fromDate': f"{dt.datetime.strftime(current, '%Y-%m-%dT%H:%M:%S%z')}"}).json()
                     files_to_download = []
-                    for export in response_json:
-                        if "uid" in export:
-                            export_uid = export["uid"]
-                            file_export_url = f"{hdata['url']}/datacenter/exports/{export_uid}/download"
-                            export_response_json = session.get(file_export_url,
-                                                               headers={"Organization": hdata['org_uid']}).json()
-                            if "downloadUrl" in export_response_json:
-                                files_to_download.append(export_response_json["downloadUrl"])
+                    if response_json['files']:
+                        download_url = f"{hdata['url']}/file"
+                        for file in response_json['files']:
+                            download_response_json = session.post(download_url,
+                                                                  data=json.dumps(payload),
+                                                                  params={'filename': file['fileName']}).json()
+                            if "fileUrl" in download_response_json:
+                                files_to_download.append(download_response_json["fileUrl"])
 
 
                     # Download files
@@ -147,7 +141,7 @@ def main():
                     plog(repr(e))
                 finally:
                     session.close()
-            current = dt.datetime.now()
+            current = dt.datetime.now().astimezone()
             sleep_interval = (next_start - current).seconds
             if sleep_interval > 0:
                 plog(f'Cycle ended and sleep begun at {current}')
