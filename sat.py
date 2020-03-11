@@ -12,9 +12,9 @@ from support import *
 from urllib.parse import urlparse, unquote
 
 
-def fetch(current_dt):
+def fetch(last):
     """
-    :param current_dt: An aware datetime to be used for a fromDate request param
+    :param last: An aware datetime string of the form '%Y-%m-%dT%H:%M:%S%z' to be used for a fromDate request param
     :return: None
     """
     try:
@@ -46,7 +46,7 @@ def fetch(current_dt):
             log(f"Request for undelivered files begun")
             response_json = session.post(f"{hdata['url']}/files/list",
                                          data=json.dumps(payload),
-                                         params={'fromDate': f"{dt.datetime.strftime(current_dt, '%Y-%m-%dT%H:%M:%S%z')}"}).json()
+                                         params={'fromDate': f"{last}"}).json()
             files_to_download = []
             if response_json['files']:
                 download_url = f"{hdata['url']}/file"
