@@ -12,14 +12,15 @@ from support import *
 from urllib.parse import urlparse, unquote
 
 
-def fetch(last):
+def fetch(current):
     """
-    :param last: An aware datetime string of the form '%Y-%m-%dT%H:%M:%S%z' to be used for a fromDate request param
+    :param current: An aware datetime to be saved after a successful fetch
     :return: None
     """
     try:
-        hpath = None
-        hdata = None
+        with open('last.dat') as file:
+            last = file.readline().strip()
+
         if 'HOME' in os.environ:
             hpath = PurePath(os.environ['HOME'])
         else:
@@ -78,6 +79,9 @@ def fetch(last):
                         log(f'Download to {download_path} successful')
                     else:
                         raise requests.RequestException(f"There was an error retrieving {file} with status code {download_response.status_code}.\n{download_response.content}")
+
+            with open('last.dat', 'w') as file:
+                file.write(dt.datetime.strftime(current, '%Y-%m-%dT%H:%M:%S%z') + '\n')
         except (OSError,
                 json.JSONDecodeError,
                 requests.RequestException,

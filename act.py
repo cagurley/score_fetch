@@ -16,8 +16,6 @@ def fetch():
     :return: None
     """
     try:
-        hpath = None
-        hdata = None
         if 'HOME' in os.environ:
             hpath = PurePath(os.environ['HOME'])
         else:
