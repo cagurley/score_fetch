@@ -18,7 +18,7 @@ def fetch(current):
     :return: None
     """
     try:
-        with open('last.dat') as file:
+        with open('sat.dat') as file:
             last = file.readline().strip()
 
         if 'HOME' in os.environ:
@@ -80,7 +80,7 @@ def fetch(current):
                     else:
                         raise requests.RequestException(f"There was an error retrieving {file} with status code {download_response.status_code}.\n{download_response.content}")
 
-            with open('last.dat', 'w') as file:
+            with open('sat.dat', 'w') as file:
                 file.write(dt.datetime.strftime(current, '%Y-%m-%dT%H:%M:%S%z') + '\n')
         except (OSError,
                 json.JSONDecodeError,

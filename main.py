@@ -2,12 +2,13 @@
 Fetcher main
 """
 
-import act
 import datetime as dt
 import os
+from time import sleep
+import act
 import sat
 from support import log, plog
-from time import sleep
+import toefl
 
 
 def main():
@@ -19,6 +20,10 @@ def main():
             plog(f'Cycle begun at {current}')
             act.fetch()
             sat.fetch(current)
+            with open('toefl.dat') as f:
+                last = dt.datetime.strptime(f.read().strip(), '%Y-%m-%d').date()
+                if current.date() > last:
+                    toefl.fetch(last, current.date())
             current = dt.datetime.now().astimezone()
             sleep_interval = (next_start - current).seconds
             if sleep_interval > 0:
