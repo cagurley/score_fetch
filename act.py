@@ -42,7 +42,7 @@ def fetch():
             response_json = session.post(f"{hdata['url']}/login", data=json.dumps(payload)).json()
             if "sessionToken" not in response_json:
                 raise MissingResponseError(f"Couldn't find sessionToken in response json:\n {response_json}")
-            session.headers.update({"Authorization": f"JWT {response_json['sessionToken']}"})
+            session.headers.update({"Authorization": f"Bearer {response_json['sessionToken']}"})
 
             # Determine files to download
             log(f"Request for undelivered files begun")
